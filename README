@@ -1,3 +1,7 @@
-README FILE FOR PYTWIT
+README FILE FOR STWIT
 
 A COMMAND LINE TWITTER CLIENT
+
+As ssh stands for "secure shell", stwit stands for secure twit which
+is a console based twitter client that won't reveal so easily that
+you're tweeting at work hours.

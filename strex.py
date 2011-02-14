@@ -112,7 +112,7 @@ elif flags.count(sys.argv[1]) :
     api=OAuthApi(consumer_key,consumer_secret,atoken,stoken)
 
     if sys.argv[1]=='-ft' :
-        statuses= api.GetFriendsTimeline(count=1)
+        statuses= api.GetFriendsTimeline()
         print statuses
         for i in range(len(statuses)):
             print statuses[i].user.name +': '+ statuses[i].text

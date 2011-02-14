@@ -1,7 +1,17 @@
 README FILE FOR STWIT
+changing name to strex
 
 A COMMAND LINE TWITTER CLIENT
 
-As ssh stands for "secure shell", stwit stands for secure twit which
-is a console based twitter client that won't reveal so easily that
-you're tweeting at work hours.
+As ssh stands for "secure shell", strex was meant to be stwit so it
+could stand for secure twit, but since the name was already taken it
+was the same history as twirex and it became strex. Whatever this is a
+console based twitter client that won't reveal so easily that you're
+tweeting at work hours.
+
+
+REQUERIMENTS
+
+python
+oauth2 lib
+oauth-twitter-python2 lib maybe a little hacking on this one

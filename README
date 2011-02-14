@@ -15,3 +15,16 @@ REQUERIMENTS
 python
 oauth2 lib
 oauth-twitter-python2 lib maybe a little hacking on this one
+
+oauthtwitter.py(82) must read
+
+80        if http_method == "POST":
+81            encoded_post_data = req.to_postdata()
+82            url = req.normalized_url
+83        else:
+84            url = req.to_url()
+85            encoded_post_data = ""
+            
+or else it should fail
+
+

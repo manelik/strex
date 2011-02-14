@@ -112,15 +112,14 @@ elif flags.count(sys.argv[1]) :
     api=OAuthApi(consumer_key,consumer_secret,atoken,stoken)
 
     if sys.argv[1]=='-ft' :
-        statuses= api.GetFriendsTimeline()
-        print statuses
-        for i in range(len(statuses)):
-            print statuses[i].user.name +': '+ statuses[i].text
+        statuses= api.GetFriendsTimeline({'count':20})
+        for i in statuses:
+            print i.pop('user').pop('screen_name') +': '+ i.pop('text')
 
     elif sys.argv[1]=='-ut' :
-        statuses= api.GetUserTimeline(user=sys.argv[2], count=20)
-        for i in range(len(statuses)):
-            print statuses[i].user.name +': '+ statuses[i].text
+        statuses= api.GetUserTimeline({'user':sys.argv[2], 'count':20})
+        for i in statuses:
+            print i.pop('user').pop('screen_name') +': '+ i.pop('text')
             
     elif sys.argv[1]=='-us' :
         message=''

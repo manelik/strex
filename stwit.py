@@ -37,7 +37,7 @@ cons_data.close()
 
 
 for x in plines:
-  elif x.find('consumerkey')+1 :
+  if x.find('consumerkey')+1 :
     consumer_key = x.partition('&')[2].strip()
   elif x.find('consumersecret')+1 :
     consumer_secret = x.partition('&')[2].strip()
@@ -112,7 +112,8 @@ elif flags.count(sys.argv[1]) :
     api=OAuthApi(consumer_key,consumer_secret,atoken,stoken)
 
     if sys.argv[1]=='-ft' :
-        statuses= api.GetFriendsTimeline()
+        statuses= api.GetFriendsTimeline(count=1)
+        print statuses
         for i in range(len(statuses)):
             print statuses[i].user.name +': '+ statuses[i].text
 

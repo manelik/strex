@@ -125,6 +125,9 @@ elif flags.count(sys.argv[1]) :
         message=''
         for s in sys.argv[2:]:
             message+=' '+ s
+        while len(message)>140:
+            api.UpdateStatus(message[0:138]+'...')
+            message=message[138:]
         api.UpdateStatus(message.strip())
 else :
     print 'Unrecognized flag'

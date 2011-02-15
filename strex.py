@@ -30,9 +30,14 @@ if len(sys.argv)==1 :
   print 'Here goes help message'
   quit()
 
+
+#Configs folder
+
+c_folder=os.path.join(os.path.expanduser('~'),'.strex')
+
 plines=[]
 
-cons_data=open('consumer.info','r')
+cons_data=open(os.path.join(c_folder,'consumer.info'),'r')
 
 plines.extend(cons_data.readlines())
 cons_data.close()
@@ -50,7 +55,7 @@ for x in plines:
 loggin=['-li','-lo','-su','-au']
 flags=['-ft','-ut','-us']
 
-user_data=open('login.info','r')
+user_data=open(os.path.join(c_folder,'login.info'),'r')
 userraw=user_data.readlines()
 userlist=[]
 user_data.close()
@@ -62,7 +67,7 @@ if loggin.count(sys.argv[1]) :
     if sys.argv[1]=='-li' :
         user = sys.argv[sys.argv.index('-li')+1]
         if userlist.count(user) :
-            user_file=open('ulog','w')
+            user_file=open(os.path.join(c_folder,'ulog'),'w')
             user_file.write(user+'\n')
             user_file.close()
         else :
@@ -70,7 +75,7 @@ if loggin.count(sys.argv[1]) :
 
     elif sys.argv[1]=='-lo' :
         #log-out 
-        user_file=open('ulog','w')
+        user_file=open(os.path.join(c_folder,'ulog'),'w')
         user_file.write('\n')
         user_file.close()
    
@@ -97,14 +102,14 @@ if loggin.count(sys.argv[1]) :
         
         userraw.append(sys.argv[2]+'&'+access_token['oauth_token']+'&'
                        +access_token['oauth_token_secret'])
-        user_data=open('login.info','a')
+        user_data=open(os.path.join(c_folder,'login.info'),'a')
         user_data.write(sys.argv[2]+'&'+access_token['oauth_token']
                         +'&'+access_token['oauth_token_secret']+'\n')
         user_data.close()
 
 elif flags.count(sys.argv[1]) :
     
-    curruser = open('ulog','r')
+    curruser = open(os.path.join(c_folder,'ulog'),'r')
     user = curruser.readline().strip()
     curruser.close()
     for x in userraw:

@@ -1,6 +1,9 @@
 #!/usr/bin/python
 
 
+__author__='Jose Manuel Torres'
+__version__='alpha_0.1'
+
 import sys
 import os
 

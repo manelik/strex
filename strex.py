@@ -15,32 +15,37 @@ try:
   import skynet
 except ImportError:
 #  sys.stderr.write('Skynet still unavailable\n')
-  pass
+  pass # For the time being a failed skynet import won't be
+       # reported.
 
+# When skynet is ready is going to be like SURPRISE!! BANG BANG!
 
-
-# Parser did nothing at this stage!! minimize it!
-# Parser looks for login.info consumer.info
-# login format user&attribute:value&atribute:value&...
-# 
-
+# No options, no program
+# maybe this will trigger iclient
 if len(sys.argv)==1 :
   print 'Here goes help message'
   quit()
 
 
-#Configs folder
+# Valid flags, there are login related flags
+# and action related flags
+loggin=['-li','-lo','-su','-au']
+flags=['-tl','-ut','-us','-xb']
+
+# Configs folder default something like $HOME/.strex
+# more on cross-compatibility later
 
 c_folder=os.path.join(os.path.expanduser('~'),'.strex')
 
 plines=[]
 
+# Parser looks for login.info consumer.info
+
+# consumer.info contains app keys in format attribute&value
 cons_data=open(os.path.join(c_folder,'consumer.info'),'r')
 
 plines.extend(cons_data.readlines())
 cons_data.close()
-
-
 
 for x in plines:
   if x.find('consumerkey')+1 :
@@ -49,10 +54,8 @@ for x in plines:
     consumer_secret = x.partition('&')[2].strip()
 
 
-
-loggin=['-li','-lo','-su','-au']
-flags=['-ft','-ut','-us','-xb']
-
+# login.info contains the user database
+# in format user&attribute:value&atribute:value&...
 user_data=open(os.path.join(c_folder,'login.info'),'r')
 userraw=user_data.readlines()
 userlist=[]
@@ -60,6 +63,8 @@ user_data.close()
 for x in userraw:
   userlist.append(x.partition('&')[0])
 
+
+# do some login
 if loggin.count(sys.argv[1]) :
   # log-in as a registred user
   if sys.argv[1]=='-li' :
@@ -72,7 +77,7 @@ if loggin.count(sys.argv[1]) :
       print 'User not registred'
 
   elif sys.argv[1]=='-lo' :
-        #log-out 
+        #log-out errases current user 
     user_file=open(os.path.join(c_folder,'ulog'),'w')
     user_file.write('\n')
     user_file.close()
@@ -102,6 +107,7 @@ if loggin.count(sys.argv[1]) :
                     +'&'+'lstat:'+'0''\n')
     user_data.close()
 
+# Real actions
 elif flags.count(sys.argv[1]) :
 
   # Parse login file    
@@ -129,14 +135,14 @@ elif flags.count(sys.argv[1]) :
   statuses=[]
 
   if sys.argv[1]=='-xb' : #just check if there are new messages for xmobar
-    statuses=api.GetFriendsTimeline({'count':1})
+    statuses=api.GetHomeTimeline({'count':1})
     curr_id=int(statuses[0].pop('id'))
     if curr_id>last_id :
       print '<fc=red>New twitts</fc>'
     else:
       print 'No news'
 
-  if sys.argv[1]=='-ft' : # Check friend timeline, update last read status
+  if sys.argv[1]=='-tl' : # Check friend timeline, update last read status
     if len(sys.argv)==2:
       num_statuses=20
     elif len(sys.argv)==3:
@@ -179,5 +185,5 @@ elif flags.count(sys.argv[1]) :
       api.UpdateStatus(message.strip())
 else :
   print 'Unrecognized flag'
-
+  print 'Here goes help message'
 

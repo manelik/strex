@@ -151,9 +151,15 @@ elif flags.count(sys.argv[1]) :
       print 'too many arguments' 
 
     statuses=api.GetHomeTimeline({'count':num_statuses})
-    curr_id=statuses[0].pop('id')
+    curr_id=statuses[0]['id']
+    new_str='*'
     for i in statuses:
-      print i.pop('user').pop('screen_name') +': '+ i.pop('text')
+      if int(i['id'])<=last_id:
+        if new_str=='*':
+          print '----------------------------------------------------------'
+        new_str=''
+        
+      print new_str+i.pop('user').pop('screen_name') +': '+ i.pop('text')
 
     user_data=open(os.path.join(c_folder,'login.info'),'w')
     for x in userraw:

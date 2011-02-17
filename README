@@ -1,13 +1,19 @@
-README FILE FOR STWIT
-changing name to strex
+README FILE FOR STREX
 
 A COMMAND LINE TWITTER CLIENT
+
 
 As ssh stands for "secure shell", strex was meant to be stwit so it
 could stand for secure twit, but since the name was already taken it
 was the same history as twirex and it became strex. Whatever this is a
 console based twitter client that won't reveal so easily that you're
 tweeting at work hours.
+
+Already mentioned how the name came to be, but it actually can be
+meant as an acronym for
+
+Secure Twitter Remote Engine X
+the X is for added coolpoints
 
 
 REQUERIMENTS
@@ -25,6 +31,37 @@ oauthtwitter.py(82) must read
 84            url = req.to_url()
 85            encoded_post_data = ""
             
-or else it should fail
+or else it should fail when posting
 
 
+INSTALLATION/PREPARATION
+
+There's not really something as installation, you just run strex.py
+but it's necesary to have the config folder and maybe empty config
+files.
+
+you@urmachine:~$ mkdir .strex
+you@urmachine:~$ touch consumer.info
+you@urmachine:~$ touch login.info
+you@urmachine:~$ touch ulog
+
+For the consumer key/secret you need to gain my trust or else register
+your own app at
+ 
+http://twitter.com/oauth_clients
+
+write them in consumer.info as
+consumerkey&value
+consumersecret&value
+
+And you are done!
+strex ready for your command line twitting
+
+USAGE
+
+-au user registers user on database
+-li user logs you as user
+-su shows user list
+
+-tl n shows your last n twitts on your timeline
+-us "Your post" posts something 

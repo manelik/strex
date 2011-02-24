@@ -226,11 +226,11 @@ elif flags.count(sys.argv[1]) :
     import time
     loop_flag=True
     if last_id==0:
-      call_opts.update({'count':num_statuses})
+      call_opts.update({'count':20})
     else :
       call_opts.update({'since_id':last_id})
     while True:
-      statuses=api.GetUserTimeline(call_opts)
+      statuses=api.GetHomeTimeline(call_opts)
       while len(statuses):
         curr_status=statuses.pop(-1)
         last_id=curr_status['id']

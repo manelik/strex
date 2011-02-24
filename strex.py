@@ -7,6 +7,8 @@ __version__='alpha_0.1'
 import sys
 import os
 
+import strexmisc
+
 from oauth import oauth
 from oauthtwitter import OAuthApi
 
@@ -23,22 +25,19 @@ except ImportError:
 # No options, no program
 # maybe this will trigger iclient
 if len(sys.argv)==1 :
-  print 'Here goes help message'
+  strexmisc.help_message(1)
   quit()
-
 
 # Valid flags, there are login related flags
 # and action related flags
 loggin=['-li','-lo','-su','-au']
-flags=['-tl','-ut','-us','-xb']
+flags=['-tl','-ut','-us','-xb','-se','--help']
 
 # Configs folder default something like $HOME/.strex
 # more on cross-compatibility later
-
 c_folder=os.path.join(os.path.expanduser('~'),'.strex')
 
 plines=[]
-
 # Parser looks for login.info consumer.info
 
 # consumer.info contains app keys in format attribute&value
@@ -53,7 +52,6 @@ for x in plines:
   elif x.find('consumersecret')+1 :
     consumer_secret = x.partition('&')[2].strip()
 
-
 # login.info contains the user database
 # in format user&attribute:value&atribute:value&...
 user_data=open(os.path.join(c_folder,'login.info'),'r')
@@ -62,7 +60,6 @@ userlist=[]
 user_data.close()
 for x in userraw:
   userlist.append(x.partition('&')[0])
-
 
 # do some login
 if loggin.count(sys.argv[1]) :
@@ -88,6 +85,10 @@ if loggin.count(sys.argv[1]) :
       print x
 
   elif sys.argv[1]=='-au' :
+    if len(sys.argv)==2:
+      strexmisc.help_message(1)
+      quit()
+      
     #Standard Oauth authentication
     twitter = OAuthApi(consumer_key, consumer_secret)
     # Get the temporary credentials for our next few calls
@@ -133,63 +134,96 @@ elif flags.count(sys.argv[1]) :
 
   num_statuses=0
   statuses=[]
+  call_opts={}
 
   if sys.argv[1]=='-xb' : #just check if there are new messages for xmobar
-    statuses=api.GetHomeTimeline({'count':1})
-    curr_id=int(statuses[0].pop('id'))
-    if curr_id>last_id :
+    statuses=api.GetHomeTimeline({'since_id':last_id})
+    if len(statuses):
       print '<fc=red>New twitts</fc>'
     else:
       print 'No news'
 
   if sys.argv[1]=='-tl' : # Check friend timeline, update last read status
-    if len(sys.argv)==2:
+    # Sanity check
+    if len(sys.argv)==2: # No args fetches since the last_id
       num_statuses=20
-    elif len(sys.argv)==3:
-      num_statuses=int(sys.argv[2])
+      call_opts.update({'since_id':last_id})
+    elif len(sys.argv)==3:          # argument following -tl is number of 
+      num_statuses=int(sys.argv[2]) # statuses fetched
     elif len(sys.argv)>3:
-      print 'too many arguments' 
+      print 'too many arguments'    # unnecessary args
 
-    statuses=api.GetHomeTimeline({'count':num_statuses})
-    curr_id=statuses[0]['id']
-    new_str='*'
-    for i in statuses:
-      if int(i['id'])<=last_id:
-        if new_str=='*':
-          print '----------------------------------------------------------'
-        new_str=''
-        
-      print new_str+i.pop('user').pop('screen_name') +': '+ i.pop('text')
+    call_opts.update({'count':num_statuses})
+    statuses=api.GetHomeTimeline(call_opts)
 
-    user_data=open(os.path.join(c_folder,'login.info'),'w')
-    for x in userraw:
-      if x.find(user)==-1:
-        user_data.write(x)
-    user_data.write(user+'&'+'token:'+atoken+'&'+'stoken:'+stoken+'&'
-                    +'lstat:'+str(curr_id)+'\n')
-    user_data.close()
+    if len(statuses)>0:
+      curr_id=statuses[0]['id']
+      new_str='*'
+      for i in statuses:
+        if int(i['id'])<=last_id:
+          if new_str=='*':
+            print '----------------------------------------------------------'
+          new_str=''
+          
+        print new_str+i.pop('user').pop('screen_name') +': '+ i.pop('text')
     
+      user_data=open(os.path.join(c_folder,'login.info'),'w') # Open database append changes
+      for x in userraw:
+        if x.find(user)==-1: 
+          user_data.write(x)
+      user_data.write(user+'&'+'token:'+atoken+'&'+'stoken:'+stoken+'&'
+                      +'lstat:'+str(curr_id)+'\n')
+      user_data.close()
+    else:
+      print 'No new updates'
+
   elif sys.argv[1]=='-ut' : # Check statuses for a specific user
+    # Sanity Check
+    if len(sys.argv)==3: # No args fetches since the last_id
+      num_statuses=20
+      call_opts.update({'since_id':last_id})
+    elif len(sys.argv)==4:          # argument following -tl is number of 
+      num_statuses=int(sys.argv[3]) # statuses fetched
+    elif len(sys.argv)>4:
+      print 'too many arguments'    # unnecessary args
+
+    call_opts.update({'count':num_statuses,'user':sys.argv[2]})
+    statuses=api.GetUserTimeline(call_opts)
+
+    for i in statuses:
+      print i.pop('user').pop('screen_name') +': '+ i.pop('text')
+    
+    if len(statuses)==0:
+      print 'No new updates from '+sys.argv[2] 
+
+  elif sys.argv[1]=='-us' : # Update status, auto-breaking long ones
+    message=''
+    for s in sys.argv[2:]:
+      message+=' '+ s
+    while len(message)>140:
+      api.UpdateStatus(message[0:138]+'...')
+      message=message[138:]
+    api.UpdateStatus(message.strip())
+
+  elif sys.argv[1]=='-se': # Search
     if len(sys.argv)==3:
       num_statuses=20
+      call_opts.update({'since_id':last_id})
     elif len(sys.argv)==4:
       num_statuses=int(sys.argv[3])
     elif len(sys.argv)>4:
       print 'too many arguments' 
 
-    statuses=api.GetUserTimeline({'user':sys.argv[2], 'count':num_statuses})
+    call_opts.update({'count':num_statuses,'q':sys.argv[2],
+                      'rpp':num_statuses,'result_type':'recent'})
+    
+    statuses=api.GetSearchResults(call_opts).pop('results')
     for i in statuses:
-      print i.pop('user').pop('screen_name') +': '+ i.pop('text')
-            
-  elif sys.argv[1]=='-us' : # Update status, auto-breaking long ones
-    message=''
-    for s in sys.argv[2:]:
-      message+=' '+ s
-      while len(message)>140:
-        api.UpdateStatus(message[0:138]+'...')
-        message=message[138:]
-      api.UpdateStatus(message.strip())
+      print i.pop('from_user')+': '+ i.pop('text')
+
+  elif sys.argv[1]=='--help': # Full help message
+    strexmisc.help_message(2)
 else :
-  print 'Unrecognized flag'
-  print 'Here goes help message'
+  strexmisc.help_message(1)
+
 

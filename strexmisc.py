@@ -35,3 +35,5 @@ def help_message(code):
         print ''
         print 'For bug reports and suggestions contact me at github.com/manelik'
         print ''
+
+

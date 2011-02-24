@@ -31,7 +31,7 @@ if len(sys.argv)==1 :
 # Valid flags, there are login related flags
 # and action related flags
 loggin=['-li','-lo','-su','-au']
-flags=['-tl','-ut','-us','-xb','-se','--help']
+flags=['-tl','-ut','-us','-xb','-se','--help','-i']
 
 # Configs folder default something like $HOME/.strex
 # more on cross-compatibility later
@@ -221,6 +221,36 @@ elif flags.count(sys.argv[1]) :
     for i in statuses:
       print i.pop('from_user')+': '+ i.pop('text')
 
+  elif sys.argv[1]=='-i': #interactive??
+
+    import time
+    loop_flag=True
+    if last_id==0:
+      call_opts.update({'count':num_statuses})
+    else :
+      call_opts.update({'since_id':last_id})
+    while True:
+      statuses=api.GetUserTimeline(call_opts)
+      while len(statuses):
+        curr_status=statuses.pop(-1)
+        last_id=curr_status['id']
+        print curr_status['user']['screen_name']+': '+ curr_status['text']
+        if (user==curr_status['user']['screen_name'] 
+            and curr_status['text'].count('#stop#strex')):
+          loop_flag=False
+      if not(loop_flag):
+        break
+      call_opts.update({'since_id':last_id})
+      time.sleep(20)
+
+    user_data=open(os.path.join(c_folder,'login.info'),'w') # Open database append changes
+    for x in userraw:
+      if x.find(user)==-1: 
+        user_data.write(x)
+    user_data.write(user+'&'+'token:'+atoken+'&'+'stoken:'+stoken+'&'
+                    +'lstat:'+str(last_id)+'\n')
+    user_data.close()
+        
   elif sys.argv[1]=='--help': # Full help message
     strexmisc.help_message(2)
 else :

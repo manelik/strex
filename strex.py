@@ -31,7 +31,7 @@ if len(sys.argv)==1 :
 # Valid flags, there are login related flags
 # and action related flags
 loggin=['-li','-lo','-su','-au']
-flags=['-tl','-ut','-us','-xb','-se','--help','-i']
+flags=['-tl','-ut','-us','-xb','-se','--help','-ir','-iu']
 
 # Configs folder default something like $HOME/.strex
 # more on cross-compatibility later
@@ -221,7 +221,7 @@ elif flags.count(sys.argv[1]) :
     for i in statuses:
       print i.pop('from_user')+': '+ i.pop('text')
 
-  elif sys.argv[1]=='-i': #interactive??
+  elif sys.argv[1]=='-ir': #interactive??
 
     import time
     loop_flag=True
@@ -234,7 +234,9 @@ elif flags.count(sys.argv[1]) :
       while len(statuses):
         curr_status=statuses.pop(-1)
         last_id=curr_status['id']
-        print curr_status['user']['screen_name']+': '+ curr_status['text']
+        curr_time=curr_status['created_at'].split()[3]
+        print (curr_time+' '+curr_status['user']['screen_name']+': '
+               + curr_status['text'])
         if (user==curr_status['user']['screen_name'] 
             and curr_status['text'].count('#stop#strex')):
           loop_flag=False
@@ -251,6 +253,13 @@ elif flags.count(sys.argv[1]) :
                     +'lstat:'+str(last_id)+'\n')
     user_data.close()
         
+  elif sys.argv[1]=='-iu':
+    message=''
+    while message<>'q':
+      message=raw_input()
+      if message<>'q':
+        api.UpdateStatus(message.strip()).keys()
+
   elif sys.argv[1]=='--help': # Full help message
     strexmisc.help_message(2)
 else :

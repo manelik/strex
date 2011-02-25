@@ -264,6 +264,10 @@ elif flags.count(sys.argv[1]) :
     while message<>'q':
       message=raw_input()
       if message<>'q':
+        while len(message)>140:
+          api.UpdateStatus(message[0:138]+'...')
+          message=message[138:]
+
         api.UpdateStatus(message.strip()).keys()
 
   elif sys.argv[1]=='--help': # Full help message

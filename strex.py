@@ -224,6 +224,7 @@ elif flags.count(sys.argv[1]) :
   elif sys.argv[1]=='-ir': #interactive??
 
     import time
+    local_hour=-6
     loop_flag=True
     if last_id==0:
       call_opts.update({'count':20})
@@ -235,6 +236,11 @@ elif flags.count(sys.argv[1]) :
         curr_status=statuses.pop(-1)
         last_id=curr_status['id']
         curr_time=curr_status['created_at'].split()[3]
+        hour_mod=int(curr_status['created_at'].split()[4])
+        real_hour= int(curr_time.split(':')[0])+local_hour-hour_mod
+        if real_hour < 6 : real_hour+= 24
+
+        curr_time=str(real_hour)+':'+curr_time.partition(':')[2]
         print (curr_time+' '+curr_status['user']['screen_name']+': '
                + curr_status['text'])
         if (user==curr_status['user']['screen_name'] 

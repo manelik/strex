@@ -28,11 +28,24 @@ if len(sys.argv)==1 :
   strexmisc.help_message(1)
   quit()
 
+
+def make_realtime(hour='00:00:00',lpost='0',lclient='0'):
+  real_hour= int(hour.split(':')[0])+lclient-lpost
+  if real_hour < 6 : real_hour+= 24
+
+  return str(real_hour)+':'+hour.partition(':')[2]
+
+
 # Valid flags, there are login related flags
 # and action related flags
 loggin=['-li','-lo','-su','-au']
 flags=['-tl','-ut','-us','-xb','-se','--help','-ir','-iu']
-
+#modifying flags
+#
+# fetch -f -fu -fs -fi
+# time  -t
+# post  -p -pi
+#
 # Configs folder default something like $HOME/.strex
 # more on cross-compatibility later
 c_folder=os.path.join(os.path.expanduser('~'),'.strex')
@@ -237,10 +250,7 @@ elif flags.count(sys.argv[1]) :
         last_id=curr_status['id']
         curr_time=curr_status['created_at'].split()[3]
         hour_mod=int(curr_status['created_at'].split()[4])
-        real_hour= int(curr_time.split(':')[0])+local_hour-hour_mod
-        if real_hour < 6 : real_hour+= 24
-
-        curr_time=str(real_hour)+':'+curr_time.partition(':')[2]
+        curr_time=make_realtime(curr_time,hour_mod,local_hour)
         print (curr_time+' '+curr_status['user']['screen_name']+': '
                + curr_status['text'])
         if (user==curr_status['user']['screen_name'] 

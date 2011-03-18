@@ -152,7 +152,7 @@ elif flags.count(sys.argv[1]) :
   if sys.argv[1]=='-xb' : #just check if there are new messages for xmobar
     statuses=api.GetHomeTimeline({'since_id':last_id})
     if len(statuses):
-      print '<fc=red>New twitts</fc>'
+      print '<fc=red>'+str(len(statuses))+' New twitts</fc>'
     else:
       print 'No news'
 
@@ -162,11 +162,11 @@ elif flags.count(sys.argv[1]) :
       num_statuses=20
       call_opts.update({'since_id':last_id})
     elif len(sys.argv)==3:          # argument following -tl is number of 
-      num_statuses=int(sys.argv[2]) # statuses fetched
+      call_opts.update({'count':sys.argv[2]})   # statuses fetched
     elif len(sys.argv)>3:
       print 'too many arguments'    # unnecessary args
 
-    call_opts.update({'count':num_statuses})
+#    call_opts.update({'count':num_statuses})
     statuses=api.GetHomeTimeline(call_opts)
 
     if len(statuses)>0:
@@ -232,7 +232,7 @@ elif flags.count(sys.argv[1]) :
     
     statuses=api.GetSearchResults(call_opts).pop('results')
     for i in statuses:
-      print i.pop('from_user')+': '+ i.pop('text')
+      print i.pop('created_at')+ i.pop('from_user')+': '+ i.pop('text')
 
   elif sys.argv[1]=='-ir': #interactive??
 

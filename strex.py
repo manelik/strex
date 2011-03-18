@@ -129,6 +129,9 @@ elif flags.count(sys.argv[1]) :
   user = curruser.readline().strip()
   curruser.close()
 
+  atoken=''
+  stoken=''
+  last_id=''
   for x in userraw:
     if x.find(user)+1 :  
       tempstr=x.partition('&')[2].partition('&')

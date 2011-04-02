@@ -36,10 +36,25 @@ def make_realtime(hour='00:00:00',lpost='0',lclient='0'):
   return str(real_hour)+':'+hour.partition(':')[2]
 
 
+def validate_flag(flag=''):
+
+  val_flags= 'fpitusx'
+
+  if flag=='': return 1
+  if flag.count('f') and flag.count('p'): return 2
+  if flag.count('u') and flag.count('s'): return 2
+  if flag.count('x') and not(len(flag)): return 2
+
+  for x in flag:
+    if not(val_flags.count): return 3
+
+  return 0
+
+
 # Valid flags, there are login related flags
 # and action related flags
-loggin=['-li','-lo','-su','-au']
-flags=['-tl','-ut','-us','-xb','-se','--help','-ir','-iu']
+loggin=['--login','--logout','--show','--authenticate','--help']
+flags=['-tl','-ut','-us','-xb','-se','-ir','-iu']
 #modifying flags
 #
 # fetch -f -fu -fs -fi
@@ -50,6 +65,8 @@ flags=['-tl','-ut','-us','-xb','-se','--help','-ir','-iu']
 # more on cross-compatibility later
 c_folder=os.path.join(os.path.expanduser('~'),'.strex')
 
+passed_flag=''
+index_arg=0
 plines=[]
 # Parser looks for login.info consumer.info
 
@@ -77,7 +94,7 @@ for x in userraw:
 # do some login
 if loggin.count(sys.argv[1]) :
   # log-in as a registred user
-  if sys.argv[1]=='-li' :
+  if sys.argv[1]=='--logini' :
     user = sys.argv[sys.argv.index('-li')+1]
     if userlist.count(user) :
       user_file=open(os.path.join(c_folder,'ulog'),'w')
@@ -86,18 +103,18 @@ if loggin.count(sys.argv[1]) :
     else :
       print 'User not registred'
 
-  elif sys.argv[1]=='-lo' :
+  elif sys.argv[1]=='--logout' :
         #log-out errases current user 
     user_file=open(os.path.join(c_folder,'ulog'),'w')
     user_file.write('\n')
     user_file.close()
     
-  elif sys.argv[1]=='-su' :
+  elif sys.argv[1]=='--show' :
     print 'Registred users: '
     for x in userlist:
       print x
 
-  elif sys.argv[1]=='-au' :
+  elif sys.argv[1]=='--authenticate' :
     if len(sys.argv)==2:
       strexmisc.help_message(1)
       quit()
@@ -120,9 +137,30 @@ if loggin.count(sys.argv[1]) :
                     +'&'+'stoken:'+access_token['oauth_token_secret']
                     +'&'+'lstat:'+'0''\n')
     user_data.close()
+  
+  elif sys.argv[1]=='--help': # Full help message
+    strexmisc.help_message(2)
 
 # Real actions
-elif flags.count(sys.argv[1]) :
+
+else :
+
+  for x in sys.argv[1:]:
+    if x[0]=='-':
+      curr_ind=sys.argv[1:].index(x)
+      if curr_ind> index_arg: index_arg=curr_ind
+      for y in x[1:]: 
+        if not(passed_flag.count(y)): passed_flag+=y
+
+
+      
+  if validate_flag(passed_flag):
+      strexmisc.help_message(1)
+      quit()
+      
+  index_arg+= 1
+
+#elif flags.count(sys.argv[1]) :
 
   # Parse login file    
   curruser = open(os.path.join(c_folder,'ulog'),'r')
@@ -152,140 +190,146 @@ elif flags.count(sys.argv[1]) :
   statuses=[]
   call_opts={}
 
-  if sys.argv[1]=='-xb' : #just check if there are new messages for xmobar
+  if passed_flag.count('x') : #just check if there are new messages for xmobar
     statuses=api.GetHomeTimeline({'since_id':last_id})
     if len(statuses):
       print '<fc=red>'+str(len(statuses))+' New twitts</fc>'
     else:
       print 'No news'
 
-  if sys.argv[1]=='-tl' : # Check friend timeline, update last read status
-    # Sanity check
-    if len(sys.argv)==2: # No args fetches since the last_id
-      num_statuses=20
-      call_opts.update({'since_id':last_id})
-    elif len(sys.argv)==3:          # argument following -tl is number of 
-      call_opts.update({'count':sys.argv[2]})   # statuses fetched
-    elif len(sys.argv)>3:
-      print 'too many arguments'    # unnecessary args
+  if passed_flag.count('f'):
+    if passed_flag.count('u') : # Check statuses for a specific user
+      # Sanity Check
 
-#    call_opts.update({'count':num_statuses})
-    statuses=api.GetHomeTimeline(call_opts)
-
-    if len(statuses)>0:
-      curr_id=statuses[0]['id']
-      new_str='*'
-      for i in statuses:
-        if int(i['id'])<=last_id:
-          if new_str=='*':
-            print '----------------------------------------------------------'
-          new_str=''
-          
-        print new_str+i.pop('user').pop('screen_name') +': '+ i.pop('text')
+      if len(sys.argv)==index_arg+1: # No args fetches since the last_id
+        quit()
+      elif len(sys.argv)==index_arg+2: # No args fetches since the last_id
+# #      num_statuses=20
+        call_opts.update({'since_id':last_id})
+      elif len(sys.argv)==index_arg+3:          # argument following -tl is number of 
+        call_opts.update({'count':int(sys.argv[index_arg+2])}) # statuses fetched
+      elif len(sys.argv)>index_arg+3:
+        print 'too many arguments'    # unnecessary args
     
+      call_opts.update({'user':sys.argv[index_arg+1]})
+      statuses=api.GetUserTimeline(call_opts)
+    
+      for i in statuses:
+        print i.pop('user').pop('screen_name') +': '+ i.pop('text')
+      
+      if len(statuses)==0:
+        print 'No new updates from '+sys.argv[index_arg+1] 
+
+    elif passed_flag.count('s'): # Search
+      # Sanity Check
+      if len(sys.argv)==index_arg+1: # No args fetches since the last_id
+        quit()
+      elif len(sys.argv)==index_arg+2: # No args fetches since the last_id
+# #      num_statuses=20
+        call_opts.update({'since_id':last_id})
+      elif len(sys.argv)==index_arg+3:          # argument following -tl is number of 
+        call_opts.update({'rpp':int(sys.argv[index_arg+2])}) # statuses fetched
+      elif len(sys.argv)>index_arg+3:
+        print 'too many arguments'    # unnecessary args
+  
+      call_opts.update({'q':sys.argv[index_arg+1],
+                        'page':1,'result_type':'recent'})
+      
+      statuses=api.GetSearchResults(call_opts).pop('results')
+      for i in statuses:
+        print i.pop('created_at')+ i.pop('from_user')+': '+ i.pop('text')
+
+    elif passed_flag.count('i'): #interactive??
+  
+      import time
+      local_hour=-6
+      loop_flag=True
+      if last_id==0:
+        call_opts.update({'count':20})
+      else :
+        call_opts.update({'since_id':last_id})
+      while True:
+        statuses=api.GetHomeTimeline(call_opts)
+        while len(statuses):
+          curr_status=statuses.pop(-1)
+          last_id=curr_status['id']
+          curr_time=curr_status['created_at'].split()[3]
+          hour_mod=int(curr_status['created_at'].split()[4])
+          curr_time=make_realtime(curr_time,hour_mod,local_hour)
+          print (curr_time+' '+curr_status['user']['screen_name']+': '
+                 + curr_status['text'])
+          if (user==curr_status['user']['screen_name'] 
+              and curr_status['text'].count('#stop#strex')):
+            loop_flag=False
+        if not(loop_flag):
+          break
+        call_opts.update({'since_id':last_id})
+        time.sleep(20)
+
       user_data=open(os.path.join(c_folder,'login.info'),'w') # Open database append changes
       for x in userraw:
         if x.find(user)==-1: 
           user_data.write(x)
       user_data.write(user+'&'+'token:'+atoken+'&'+'stoken:'+stoken+'&'
-                      +'lstat:'+str(curr_id)+'\n')
+                      +'lstat:'+str(last_id)+'\n')
       user_data.close()
-    else:
-      print 'No new updates'
 
-  elif sys.argv[1]=='-ut' : # Check statuses for a specific user
-    # Sanity Check
-    if len(sys.argv)==3: # No args fetches since the last_id
-      num_statuses=20
-      call_opts.update({'since_id':last_id})
-    elif len(sys.argv)==4:          # argument following -tl is number of 
-      num_statuses=int(sys.argv[3]) # statuses fetched
-    elif len(sys.argv)>4:
-      print 'too many arguments'    # unnecessary args
 
-    call_opts.update({'count':num_statuses,'user':sys.argv[2]})
-    statuses=api.GetUserTimeline(call_opts)
-
-    for i in statuses:
-      print i.pop('user').pop('screen_name') +': '+ i.pop('text')
+    else : # Check friend timeline, update last read status
+      # Sanity check
+      if len(sys.argv)==index_arg+1: # No args fetches since the last_id
+# #      num_statuses=20
+        call_opts.update({'since_id':last_id})
+      elif len(sys.argv)==index_arg+2:          # argument following -tl is number of 
+        call_opts.update({'count':int(sys.argv[index_arg+1])})   # statuses fetched
+      elif len(sys.argv)>index_arg+2:
+        print 'too many arguments'    # unnecessary args
     
-    if len(statuses)==0:
-      print 'No new updates from '+sys.argv[2] 
-
-  elif sys.argv[1]=='-us' : # Update status, auto-breaking long ones
-    message=''
-    for s in sys.argv[2:]:
-      message+=' '+ s
-    while len(message)>140:
-      api.UpdateStatus(message[0:138]+'...')
-      message=message[138:]
-    api.UpdateStatus(message.strip())
-
-  elif sys.argv[1]=='-se': # Search
-    if len(sys.argv)==3:
-      num_statuses=20
-      call_opts.update({'since_id':last_id})
-    elif len(sys.argv)==4:
-      num_statuses=int(sys.argv[3])
-    elif len(sys.argv)>4:
-      print 'too many arguments' 
-
-    call_opts.update({'count':num_statuses,'q':sys.argv[2],
-                      'rpp':num_statuses,'result_type':'recent'})
-    
-    statuses=api.GetSearchResults(call_opts).pop('results')
-    for i in statuses:
-      print i.pop('created_at')+ i.pop('from_user')+': '+ i.pop('text')
-
-  elif sys.argv[1]=='-ir': #interactive??
-
-    import time
-    local_hour=-6
-    loop_flag=True
-    if last_id==0:
-      call_opts.update({'count':20})
-    else :
-      call_opts.update({'since_id':last_id})
-    while True:
+# #    call_opts.update({'count':num_statuses})
       statuses=api.GetHomeTimeline(call_opts)
-      while len(statuses):
-        curr_status=statuses.pop(-1)
-        last_id=curr_status['id']
-        curr_time=curr_status['created_at'].split()[3]
-        hour_mod=int(curr_status['created_at'].split()[4])
-        curr_time=make_realtime(curr_time,hour_mod,local_hour)
-        print (curr_time+' '+curr_status['user']['screen_name']+': '
-               + curr_status['text'])
-        if (user==curr_status['user']['screen_name'] 
-            and curr_status['text'].count('#stop#strex')):
-          loop_flag=False
-      if not(loop_flag):
-        break
-      call_opts.update({'since_id':last_id})
-      time.sleep(20)
+    
+      if len(statuses)>0:
+        curr_id=statuses[0]['id']
+        new_str='*'
+        for i in statuses:
+          if int(i['id'])<=last_id:
+            if new_str=='*':
+              print '----------------------------------------------------------'
+            new_str=''
+            
+          print new_str+i.pop('user').pop('screen_name') +': '+ i.pop('text')
+      
+        user_data=open(os.path.join(c_folder,'login.info'),'w') # Open database append changes
+        for x in userraw:
+          if x.find(user)==-1: 
+            user_data.write(x)
+        user_data.write(user+'&'+'token:'+atoken+'&'+'stoken:'+stoken+'&'
+                        +'lstat:'+str(curr_id)+'\n')
+        user_data.close()
+      else:
+        print 'No new updates'
+    
 
-    user_data=open(os.path.join(c_folder,'login.info'),'w') # Open database append changes
-    for x in userraw:
-      if x.find(user)==-1: 
-        user_data.write(x)
-    user_data.write(user+'&'+'token:'+atoken+'&'+'stoken:'+stoken+'&'
-                    +'lstat:'+str(last_id)+'\n')
-    user_data.close()
+  elif passed_flag.count('p') : # Update status, auto-breaking long ones
+    if passed_flag.count('i'):
+      message=''
+      while message<>'q':
+        message=raw_input()
+        if message<>'q':
+          while len(message)>140:
+            api.UpdateStatus(message[0:138]+'...')
+            message=message[138:]
+
+          api.UpdateStatus(message.strip()).keys()
+
+    else:
+      message=''
+      for s in sys.argv[2:]:
+        message+=' '+ s
+      while len(message)>140:
+        api.UpdateStatus(message[0:138]+'...')
+        message=message[138:]
+      api.UpdateStatus(message.strip())
+
         
-  elif sys.argv[1]=='-iu':
-    message=''
-    while message<>'q':
-      message=raw_input()
-      if message<>'q':
-        while len(message)>140:
-          api.UpdateStatus(message[0:138]+'...')
-          message=message[138:]
-
-        api.UpdateStatus(message.strip()).keys()
-
-  elif sys.argv[1]=='--help': # Full help message
-    strexmisc.help_message(2)
-else :
-  strexmisc.help_message(1)
-
 

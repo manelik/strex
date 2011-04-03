@@ -33,7 +33,7 @@ def make_realtime(hour='00:00:00',lpost='0',lclient='0'):
   real_hour= int(hour.split(':')[0])+lclient-lpost
   if real_hour < 6 : real_hour+= 24
 
-  return str(real_hour)+':'+hour.partition(':')[2]
+  return str(real_hour)+':'+hour.partition(':')[2]+' '
 
 
 def validate_flag(flag=''):

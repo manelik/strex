@@ -190,10 +190,10 @@ else :
   num_statuses=0
   statuses=[]
   call_opts={}
+  import time
 
   if passed_flag.count('h'):
     hour_f=True
-    import time
     local_hour=-6
 
 
@@ -260,7 +260,7 @@ else :
         print curr_time+i.pop('created_at')+ i.pop('from_user')+': '+ i.pop('text')
 
     elif passed_flag.count('i'): #interactive??
-  
+      loop_flag=True
       if last_id==0:
         call_opts.update({'count':20})
       else :

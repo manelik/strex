@@ -38,7 +38,7 @@ def make_realtime(hour='00:00:00',lpost='0',lclient='0'):
 
 def validate_flag(flag=''):
 
-  val_flags= 'fpitusx'
+  val_flags= 'fpitusxh'
 
   if flag=='': return 1
   if flag.count('f') and flag.count('p'): return 2
@@ -68,6 +68,7 @@ c_folder=os.path.join(os.path.expanduser('~'),'.strex')
 passed_flag=''
 index_arg=0
 plines=[]
+hour_f=False
 # Parser looks for login.info consumer.info
 
 # consumer.info contains app keys in format attribute&value
@@ -190,6 +191,9 @@ else :
   statuses=[]
   call_opts={}
 
+  if passed_flag.count('h'):
+    hour_f=True
+
   if passed_flag.count('x') : #just check if there are new messages for xmobar
     statuses=api.GetHomeTimeline({'since_id':last_id})
     if len(statuses):
@@ -215,7 +219,13 @@ else :
       statuses=api.GetUserTimeline(call_opts)
     
       for i in statuses:
-        print i.pop('user').pop('screen_name') +': '+ i.pop('text')
+        if hour_f :
+          curr_time=i['created_at'].split()[3]
+          hour_mod=int(i['created_at'].split()[4])
+          curr_time=make_realtime(curr_time,hour_mod,local_hour)
+        else:
+          curr_time=''
+        print curr_time+i.pop('user').pop('screen_name') +': '+ i.pop('text')
       
       if len(statuses)==0:
         print 'No new updates from '+sys.argv[index_arg+1] 
@@ -237,7 +247,13 @@ else :
       
       statuses=api.GetSearchResults(call_opts).pop('results')
       for i in statuses:
-        print i.pop('created_at')+ i.pop('from_user')+': '+ i.pop('text')
+        if hour_f :
+          curr_time=i['created_at'].split()[3]
+          hour_mod=int(i['created_at'].split()[4])
+          curr_time=make_realtime(curr_time,hour_mod,local_hour)
+        else:
+          curr_time=''
+        print curr_time+i.pop('created_at')+ i.pop('from_user')+': '+ i.pop('text')
 
     elif passed_flag.count('i'): #interactive??
   
@@ -253,9 +269,12 @@ else :
         while len(statuses):
           curr_status=statuses.pop(-1)
           last_id=curr_status['id']
-          curr_time=curr_status['created_at'].split()[3]
-          hour_mod=int(curr_status['created_at'].split()[4])
-          curr_time=make_realtime(curr_time,hour_mod,local_hour)
+          if hour_f :
+            curr_time=curr_status['created_at'].split()[3]
+            hour_mod=int(curr_status['created_at'].split()[4])
+            curr_time=make_realtime(curr_time,hour_mod,local_hour)
+          else:
+            curr_time=''
           print (curr_time+' '+curr_status['user']['screen_name']+': '
                  + curr_status['text'])
           if (user==curr_status['user']['screen_name'] 
@@ -292,12 +311,19 @@ else :
         curr_id=statuses[0]['id']
         new_str='*'
         for i in statuses:
+          curr_time=''
           if int(i['id'])<=last_id:
             if new_str=='*':
               print '----------------------------------------------------------'
             new_str=''
+            if hour_f :
+              curr_time=i['created_at'].split()[3]
+              hour_mod=int(i['created_at'].split()[4])
+              curr_time=make_realtime(curr_time,hour_mod,local_hour)
+            else:
+              curr_time=''
             
-          print new_str+i.pop('user').pop('screen_name') +': '+ i.pop('text')
+          print new_str+curr_time +i.pop('user').pop('screen_name') +': '+ i.pop('text')
       
         user_data=open(os.path.join(c_folder,'login.info'),'w') # Open database append changes
         for x in userraw:

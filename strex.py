@@ -43,10 +43,10 @@ def validate_flag(flag=''):
   if flag=='': return 1
   if flag.count('f') and flag.count('p'): return 2
   if flag.count('u') and flag.count('s'): return 2
-  if flag.count('x') and not(len(flag)): return 2
+  if flag.count('x') and len(flag)>1: return 2
 
   for x in flag:
-    if not(val_flags.count): return 3
+    if not(val_flags.count(x)): return 3
 
   return 0
 
@@ -95,7 +95,7 @@ for x in userraw:
 # do some login
 if loggin.count(sys.argv[1]) :
   # log-in as a registred user
-  if sys.argv[1]=='--logini' :
+  if sys.argv[1]=='--login' :
     user = sys.argv[sys.argv.index('-li')+1]
     if userlist.count(user) :
       user_file=open(os.path.join(c_folder,'ulog'),'w')

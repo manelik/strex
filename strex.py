@@ -193,6 +193,10 @@ else :
 
   if passed_flag.count('h'):
     hour_f=True
+    import time
+    local_hour=-6
+
+
 
   if passed_flag.count('x') : #just check if there are new messages for xmobar
     statuses=api.GetHomeTimeline({'since_id':last_id})
@@ -257,9 +261,6 @@ else :
 
     elif passed_flag.count('i'): #interactive??
   
-      import time
-      local_hour=-6
-      loop_flag=True
       if last_id==0:
         call_opts.update({'count':20})
       else :

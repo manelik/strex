@@ -252,12 +252,12 @@ else :
       statuses=api.GetSearchResults(call_opts).pop('results')
       for i in statuses:
         if hour_f :
-          curr_time=i['created_at'].split()[3]
-          hour_mod=int(i['created_at'].split()[4])
+          curr_time=i['created_at'].split()[4]
+          hour_mod=int(i['created_at'].split()[5])
           curr_time=make_realtime(curr_time,hour_mod,local_hour)
         else:
           curr_time=''
-        print curr_time+i.pop('created_at')+ i.pop('from_user')+': '+ i.pop('text')
+        print curr_time+ i.pop('from_user')+': '+ i.pop('text')
 
     elif passed_flag.count('i'): #interactive??
       loop_flag=True
@@ -276,7 +276,7 @@ else :
             curr_time=make_realtime(curr_time,hour_mod,local_hour)
           else:
             curr_time=''
-          print (curr_time+' '+curr_status['user']['screen_name']+': '
+          print (curr_time+curr_status['user']['screen_name']+': '
                  + curr_status['text'])
           if (user==curr_status['user']['screen_name'] 
               and curr_status['text'].count('#stop#strex')):
@@ -313,17 +313,16 @@ else :
         new_str='*'
         for i in statuses:
           curr_time=''
+          if hour_f :
+            curr_time=i['created_at'].split()[3]
+            hour_mod=int(i['created_at'].split()[4])
+            curr_time=make_realtime(curr_time,hour_mod,local_hour)
+          else:
+            curr_time=''
           if int(i['id'])<=last_id:
             if new_str=='*':
               print '----------------------------------------------------------'
             new_str=''
-            if hour_f :
-              curr_time=i['created_at'].split()[3]
-              hour_mod=int(i['created_at'].split()[4])
-              curr_time=make_realtime(curr_time,hour_mod,local_hour)
-            else:
-              curr_time=''
-            
           print new_str+curr_time +i.pop('user').pop('screen_name') +': '+ i.pop('text')
       
         user_data=open(os.path.join(c_folder,'login.info'),'w') # Open database append changes

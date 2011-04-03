@@ -1,0 +1,30 @@
+#
+# add this to oauthtwitter.py to add search functionality
+#
+#
+
+    def GetSearchResults(self, options={}):
+        '''Do a search                                                                                                      
+                                                                                                                            
+          Args:                                                                                                             
+          options:                                                                                                          
+                A dict of options for the search call.                                                                      
+                See the link below for what options can be passed                                                           
+                https://dev.twitter.com/doc/get/search                                                                      
+          Return: An awful dict                                                                                             
+        '''
+        return self.SearchCall(options)
+
+    def SearchCall(self, parameters={}):
+        '''Calls the twitter search API                                                                                     
+                                                                                                                            
+       Args:                                                                                                                
+          call: The name of the api call                                                                                    
+          type: One of "GET"                                                                                                
+          parameters: Parameters to pass to the Twitter API call                                                            
+        Returns:                                                                                                            
+          Returns a dict object                                                                                             
+        '''
+        json = self._FetchUrl("http://search.twitter.com/search.json", "GET", parameters)
+        return simplejson.loads(json)
+

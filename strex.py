@@ -194,7 +194,7 @@ else :
 
   if passed_flag.count('h'):
     hour_f=True
-    local_hour=-6
+    local_hour=-5
 
 
 

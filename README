@@ -16,6 +16,10 @@ Secure Twitter Remote Engine X
 the X is for added coolpoints
 
 
+Theres a BIG TODO starting from changing the help message, updating
+this readme and add tinyurl-api support to parse and shorten url's
+
+
 REQUERIMENTS
 
 python

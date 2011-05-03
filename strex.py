@@ -38,7 +38,7 @@ def make_realtime(hour='00:00:00',lpost='0',lclient='0'):
 
 def validate_flag(flag=''):
 
-  val_flags= 'fpitusxh'
+  val_flags= 'fpiusxh'
 
   if flag=='': return 1
   if flag.count('f') and flag.count('p'): return 2
@@ -50,17 +50,20 @@ def validate_flag(flag=''):
 
   return 0
 
+def replace_urls(messraw=''):
+  retmess=messraw
+  haz_urls=strexmisc.parse_urls(messraw)
+  for x in haz_urls:
+    short_url=strexmisc.shorten_url(x)
+    retmess=retmess.replace(x,short_url)
+  return retmess
+
 
 # Valid flags, there are login related flags
 # and action related flags
 loggin=['--login','--logout','--show','--authenticate','--help']
-flags=['-tl','-ut','-us','-xb','-se','-ir','-iu']
-#modifying flags
-#
-# fetch -f -fu -fs -fi
-# time  -t
-# post  -p -pi
-#
+
+
 # Configs folder default something like $HOME/.strex
 # more on cross-compatibility later
 c_folder=os.path.join(os.path.expanduser('~'),'.strex')
@@ -259,7 +262,7 @@ else :
           curr_time=''
         print curr_time+ i.pop('from_user')+': '+ i.pop('text')
 
-    elif passed_flag.count('i'): #interactive??
+    elif passed_flag.count('i'): #idle
       loop_flag=True
       if last_id==0:
         call_opts.update({'count':20})
@@ -342,6 +345,7 @@ else :
       while message<>'q':
         message=raw_input()
         if message<>'q':
+          message=replace_urls(message)
           while len(message)>140:
             api.UpdateStatus(message[0:138]+'...')
             message=message[138:]
@@ -350,8 +354,9 @@ else :
 
     else:
       message=''
-      for s in sys.argv[2:]:
+      for s in sys.argv[2:]: #build message from extra args
         message+=' '+ s
+      message=replace_urls(message)
       while len(message)>140:
         api.UpdateStatus(message[0:138]+'...')
         message=message[138:]

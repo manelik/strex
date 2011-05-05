@@ -72,8 +72,9 @@ passed_flag=''
 index_arg=0
 plines=[]
 hour_f=False
-# Parser looks for login.info consumer.info
 
+
+# Parser looks for login.info consumer.info
 # consumer.info contains app keys in format attribute&value
 cons_data=open(os.path.join(c_folder,'consumer.info'),'r')
 
@@ -204,7 +205,12 @@ else :
   if passed_flag.count('x') : #just check if there are new messages for xmobar
     statuses=api.GetHomeTimeline({'since_id':last_id})
     if len(statuses):
-      print '<fc=red>'+str(len(statuses))+' New twitts</fc>'
+      last_list=statuses[-1]['id']
+      status_check=api.GetHomeTimeline({'since_id':last_id,'max_id':last_list})
+      modstr=''
+      if statuses[-1]['id']<>status_check[-1]['id']:
+        modstr='>'
+      print '<fc=red>'+modstr+str(len(statuses))+' New twitts</fc>'
     else:
       print 'No news'
 

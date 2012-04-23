@@ -100,7 +100,7 @@ for x in userraw:
 if loggin.count(sys.argv[1]) :
   # log-in as a registred user
   if sys.argv[1]=='--login' :
-    user = sys.argv[sys.argv.index('-li')+1]
+    user = sys.argv[sys.argv.index('--login')+1]
     if userlist.count(user) :
       user_file=open(os.path.join(c_folder,'ulog'),'w')
       user_file.write(user+'\n')
@@ -228,7 +228,7 @@ else :
       elif len(sys.argv)>index_arg+3:
         print 'too many arguments'    # unnecessary args
     
-      call_opts.update({'user':sys.argv[index_arg+1]})
+      call_opts.update({'screen_name':sys.argv[index_arg+1]})
       statuses=api.GetUserTimeline(call_opts)
     
       for i in statuses:
@@ -347,25 +347,25 @@ else :
 
   elif passed_flag.count('p') : # Update status, auto-breaking long ones
     if passed_flag.count('i'):
-      message=''
+      message=u''
       while message<>'q':
         message=raw_input()
         if message<>'q':
           message=replace_urls(message)
           while len(message)>140:
-            api.UpdateStatus(message[0:138]+'...')
+            api.UpdateStatus(message[0:138]+u'...')
             message=message[138:]
 
           api.UpdateStatus(message.strip()).keys()
 
     else:
-      message=''
+      message=u''
       for s in sys.argv[2:]: #build message from extra args
-        message+=' '+ s
+        message+=u' '+ s
       message=replace_urls(message)
       while len(message)>140:
-        api.UpdateStatus(message[0:138]+'...')
-        message=message[138:]
+        api.UpdateStatus(message[0:135]+u' ...')
+        message=message[136:]
       api.UpdateStatus(message.strip())
 
         
